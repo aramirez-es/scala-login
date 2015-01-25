@@ -37,6 +37,11 @@ trait LoginService extends HttpService {
     HttpCookie("logged", content = token)
   }
 
+  def logUserOut(token: String): Unit = {
+    println("log out user with token " + token)
+    loggedInUsers = loggedInUsers.filterNot(tuple => tuple._1 == token)
+  }
+
   val loginRoute =
     get {
       respondWithMediaType(`text/html`) {
@@ -58,19 +63,50 @@ trait LoginService extends HttpService {
             html.login.render().toString()
           }
         } ~
+        path("logout") {
+          cookie("logged") { nameCookie =>
+            loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
+              case Some(userName) =>
+                logUserOut(userName._1)
+                // Redirect to "" does not work. Hardcoded until find a fix to that.
+                redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              case None =>
+                // Redirect to "" does not work. Hardcoded until find a fix to that.
+                redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+            }
+          }
+        } ~
         path("page1") {
-          complete {
-            html.page.render().toString()
+          optionalCookie("logged") {
+            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
+              case Some(userName) => complete {
+                html.page.render(userName._2).toString()
+              }
+              case None => redirect("/login", StatusCodes.MovedPermanently)
+            }
+            case None => redirect("/login", StatusCodes.MovedPermanently)
           }
         } ~
         path("page2") {
-          complete {
-            html.page.render().toString()
+          optionalCookie("logged") {
+            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
+              case Some(userName) => complete {
+                html.page.render(userName._2).toString()
+              }
+              case None => redirect("/login", StatusCodes.MovedPermanently)
+            }
+            case None => redirect("/login", StatusCodes.MovedPermanently)
           }
         } ~
         path("page3") {
-          complete {
-            html.page.render().toString()
+          optionalCookie("logged") {
+            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
+              case Some(userName) => complete {
+                html.page.render(userName._2).toString()
+              }
+              case None => redirect("/login", StatusCodes.MovedPermanently)
+            }
+            case None => redirect("/login", StatusCodes.MovedPermanently)
           }
         }
       }
