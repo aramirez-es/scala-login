@@ -20,6 +20,11 @@ trait LoginService extends HttpService {
       respondWithMediaType(`text/html`) {
         path("") {
           complete {
+            html.index.render().toString()
+          }
+        } ~
+        path("login") {
+          complete {
             html.login.render().toString()
           }
         } ~

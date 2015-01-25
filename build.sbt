@@ -1,4 +1,5 @@
 import twirl.sbt.TwirlPlugin._
+import spray.revolver.RevolverPlugin._
 
 organization := "com.aramirez"
 
