@@ -1,3 +1,5 @@
+import twirl.sbt.TwirlPlugin._
+
 organization := "com.aramirez"
 
 name := "react-login"
@@ -17,3 +19,5 @@ libraryDependencies ++= {
 }
 
 Revolver.settings
+
+Twirl.settings
