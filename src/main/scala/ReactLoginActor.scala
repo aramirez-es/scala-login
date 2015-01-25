@@ -14,12 +14,28 @@ class ReactLoginActor extends Actor with LoginService {
 
 trait LoginService extends HttpService {
 
+  val user = "Alberto"
   val loginRoute =
-    path("") {
-      get {
-        respondWithMediaType(`text/html`) {
+    get {
+      respondWithMediaType(`text/html`) {
+        path("") {
           complete {
             html.login.render().toString()
+          }
+        } ~
+        path("page1") {
+          complete {
+            html.page.render(user).toString()
+          }
+        } ~
+        path("page2") {
+          complete {
+            html.page.render(user).toString()
+          }
+        } ~
+        path("page3") {
+          complete {
+            html.page.render(user).toString()
           }
         }
       }
