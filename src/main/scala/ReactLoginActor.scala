@@ -61,6 +61,7 @@ trait LoginService extends HttpService {
         formFields('user_name, 'user_password) { (user_name, user_password) =>
           validate(checkLogin(user_name, user_password), "Email and password not valid") {
             setCookie(HttpCookie("logged", user_name)) {
+              // Redirect to "" does not work. Hardcoded until find a fix to that.
               redirect("http://localhost:8080", StatusCodes.MovedPermanently)
             }
           }
