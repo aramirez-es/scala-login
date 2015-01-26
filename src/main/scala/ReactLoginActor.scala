@@ -32,8 +32,16 @@ trait LoginService extends HttpService with UserRepository {
           }
         } ~
         path("login") {
-          complete {
-            html.login.render().toString()
+          optionalCookie("logged") {
+            case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
+              case Some(session) => redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              case None => complete {
+                html.login.render().toString()
+              }
+            }
+            case None => complete {
+              html.login.render().toString()
+            }
           }
         } ~
         path("logout") {
@@ -54,7 +62,7 @@ trait LoginService extends HttpService with UserRepository {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
-                html.page.render(session.user.name).toString()
+                html.page.render(session.user.name, 1).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
@@ -65,7 +73,7 @@ trait LoginService extends HttpService with UserRepository {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
-                html.page.render(session.user.name).toString()
+                html.page.render(session.user.name, 2).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
@@ -76,7 +84,7 @@ trait LoginService extends HttpService with UserRepository {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
-                html.page.render(session.user.name).toString()
+                html.page.render(session.user.name, 3).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
@@ -87,6 +95,7 @@ trait LoginService extends HttpService with UserRepository {
     } ~
     post {
       path("login") {
+        // TODO: check if user is logged in before anything else.
         formFields('user_name, 'user_password) { (user_name, user_password) =>
           checkLogin(user_name, user_password) match {
             case Some(user) => setCookie(SessionManagement.logUserIn(user)) {
