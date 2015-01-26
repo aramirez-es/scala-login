@@ -15,31 +15,14 @@ class ReactLoginActor extends Actor with LoginService {
 
 trait LoginService extends HttpService {
 
-  val secure_prefix = "3240dmiv00%$xsmo!a8730"
-
   val userRepository = Seq(
     ("user_1", "123456"),
     ("user_2", "123456"),
     ("user_3", "123456")
   )
 
-  var loggedInUsers = Seq[Session]()
-
   def checkLogin(user_name: String, user_pass: String): Boolean = {
     userRepository.exists(tuple => tuple._1 == user_name && tuple._2 == user_pass)
-  }
-
-  def logUserIn(user_name: String, user_password: String): HttpCookie = {
-    val md = java.security.MessageDigest.getInstance("SHA-1");
-    val token = md.digest((secure_prefix.concat(user_name).concat(System.currentTimeMillis.toString)).getBytes).toString
-    loggedInUsers = loggedInUsers :+ new Session(token, user_name)
-    println("new user logged in " + user_name + " with token " + token)
-    HttpCookie("logged", content = token)
-  }
-
-  def logUserOut(token: String): Unit = {
-    println("log out user with token " + token)
-    loggedInUsers = loggedInUsers.filterNot(session => session.token == token)
   }
 
   val loginRoute =
@@ -47,8 +30,8 @@ trait LoginService extends HttpService {
       respondWithMediaType(`text/html`) {
         path("") {
           optionalCookie("logged") {
-            case Some(nameCookie) => complete {
-              loggedInUsers.find((session => session.token == nameCookie.content)) match {
+            case Some(loggin_cookie) => complete {
+              SessionManagement.findUserLogged(loggin_cookie.content) match {
                 case Some(session) => html.index.render(session.user_name).toString()
                 case None => html.index.render("").toString()
               }
@@ -64,10 +47,10 @@ trait LoginService extends HttpService {
           }
         } ~
         path("logout") {
-          cookie("logged") { nameCookie =>
-            loggedInUsers.find((session => session.token == nameCookie.content)) match {
+          cookie("logged") { loggin_cookie =>
+            SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => deleteCookie("logged") {
-                logUserOut(session.user_name)
+                SessionManagement.logUserOut(session.user_name)
                 // Redirect to "" does not work. Hardcoded until find a fix to that.
                 redirect("http://localhost:8080", StatusCodes.MovedPermanently)
               }
@@ -79,7 +62,7 @@ trait LoginService extends HttpService {
         } ~
         path("page1") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+            case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
                 html.page.render(session.user_name).toString()
               }
@@ -90,7 +73,7 @@ trait LoginService extends HttpService {
         } ~
         path("page2") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+            case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
                 html.page.render(session.user_name).toString()
               }
@@ -101,7 +84,7 @@ trait LoginService extends HttpService {
         } ~
         path("page3") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+            case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => complete {
                 html.page.render(session.user_name).toString()
               }
@@ -116,7 +99,7 @@ trait LoginService extends HttpService {
       path("login") {
         formFields('user_name, 'user_password) { (user_name, user_password) =>
           validate(checkLogin(user_name, user_password), "Email or password not valid") {
-            setCookie(logUserIn(user_name, user_password)) {
+            setCookie(SessionManagement.logUserIn(user_name, user_password)) {
               // Redirect to "" does not work. Hardcoded until find a fix to that.
               redirect("http://localhost:8080", StatusCodes.MovedPermanently)
             }
