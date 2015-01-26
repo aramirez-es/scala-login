@@ -1,9 +1,9 @@
 package com.aramirez
 
 import akka.actor.Actor
-import spray.routing._
+import spray.http.MediaTypes._
 import spray.http._
-import MediaTypes._
+import spray.routing._
 
 class ReactLoginActor extends Actor with LoginService {
 

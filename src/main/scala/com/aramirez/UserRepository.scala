@@ -5,7 +5,8 @@ trait UserRepository {
     new User("user_1", "123456", List("PAG_1")),
     new User("user_2", "123456", List("PAG_2")),
     new User("user_3", "123456", List("PAG_3")),
-    // User with more than one role
+
+    // Users with more than one role
     new User("user_13", "123456", List("PAG_1", "PAG_3")),
     new User("user_23", "123456", List("PAG_2", "PAG_3")),
     new User("user_12", "123456", List("PAG_1", "PAG_2")),

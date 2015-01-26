@@ -2,11 +2,12 @@ package com.aramirez
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO
-import spray.can.Http
 import akka.pattern.ask
 import akka.util.Timeout
-import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
+import spray.can.Http
+
+import scala.concurrent.duration._
 import scala.util.Try
 
 object ReactLoginApp extends App {

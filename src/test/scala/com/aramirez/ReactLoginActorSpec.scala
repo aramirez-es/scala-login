@@ -1,10 +1,10 @@
 package com.aramirez
 
 import org.specs2.mutable.Specification
+import spray.http.StatusCodes._
+import spray.http._
 import spray.routing.ValidationRejection
 import spray.testkit.Specs2RouteTest
-import spray.http._
-import StatusCodes._
 
 class LoginServiceSpec extends Specification with Specs2RouteTest with LoginService {
   def actorRefFactory = system
