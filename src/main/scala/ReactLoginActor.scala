@@ -23,7 +23,7 @@ trait LoginService extends HttpService {
     ("user_3", "123456")
   )
 
-  var loggedInUsers = Seq[(String, String)]()
+  var loggedInUsers = Seq[Session]()
 
   def checkLogin(user_name: String, user_pass: String): Boolean = {
     userRepository.exists(tuple => tuple._1 == user_name && tuple._2 == user_pass)
@@ -32,14 +32,14 @@ trait LoginService extends HttpService {
   def logUserIn(user_name: String, user_password: String): HttpCookie = {
     val md = java.security.MessageDigest.getInstance("SHA-1");
     val token = md.digest((secure_prefix.concat(user_name).concat(System.currentTimeMillis.toString)).getBytes).toString
-    loggedInUsers = loggedInUsers :+ (token, user_name)
+    loggedInUsers = loggedInUsers :+ new Session(token, user_name)
     println("new user logged in " + user_name + " with token " + token)
     HttpCookie("logged", content = token)
   }
 
   def logUserOut(token: String): Unit = {
     println("log out user with token " + token)
-    loggedInUsers = loggedInUsers.filterNot(tuple => tuple._1 == token)
+    loggedInUsers = loggedInUsers.filterNot(session => session.token == token)
   }
 
   val loginRoute =
@@ -48,8 +48,8 @@ trait LoginService extends HttpService {
         path("") {
           optionalCookie("logged") {
             case Some(nameCookie) => complete {
-              loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-                case Some(userName) => html.index.render(userName._2).toString()
+              loggedInUsers.find((session => session.token == nameCookie.content)) match {
+                case Some(session) => html.index.render(session.user_name).toString()
                 case None => html.index.render("").toString()
               }
             }
@@ -65,9 +65,9 @@ trait LoginService extends HttpService {
         } ~
         path("logout") {
           cookie("logged") { nameCookie =>
-            loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-              case Some(userName) => deleteCookie("logged") {
-                logUserOut(userName._1)
+            loggedInUsers.find((session => session.token == nameCookie.content)) match {
+              case Some(session) => deleteCookie("logged") {
+                logUserOut(session.user_name)
                 // Redirect to "" does not work. Hardcoded until find a fix to that.
                 redirect("http://localhost:8080", StatusCodes.MovedPermanently)
               }
@@ -79,9 +79,9 @@ trait LoginService extends HttpService {
         } ~
         path("page1") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-              case Some(userName) => complete {
-                html.page.render(userName._2).toString()
+            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+              case Some(session) => complete {
+                html.page.render(session.user_name).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
@@ -90,9 +90,9 @@ trait LoginService extends HttpService {
         } ~
         path("page2") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-              case Some(userName) => complete {
-                html.page.render(userName._2).toString()
+            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+              case Some(session) => complete {
+                html.page.render(session.user_name).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
@@ -101,9 +101,9 @@ trait LoginService extends HttpService {
         } ~
         path("page3") {
           optionalCookie("logged") {
-            case Some(nameCookie) => loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-              case Some(userName) => complete {
-                html.page.render(userName._2).toString()
+            case Some(nameCookie) => loggedInUsers.find((session => session.token == nameCookie.content)) match {
+              case Some(session) => complete {
+                html.page.render(session.user_name).toString()
               }
               case None => redirect("/login", StatusCodes.MovedPermanently)
             }
