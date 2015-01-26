@@ -66,10 +66,11 @@ trait LoginService extends HttpService {
         path("logout") {
           cookie("logged") { nameCookie =>
             loggedInUsers.find((tuple => tuple._1 == nameCookie.content)) match {
-              case Some(userName) =>
+              case Some(userName) => deleteCookie("logged") {
                 logUserOut(userName._1)
                 // Redirect to "" does not work. Hardcoded until find a fix to that.
                 redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              }
               case None =>
                 // Redirect to "" does not work. Hardcoded until find a fix to that.
                 redirect("http://localhost:8080", StatusCodes.MovedPermanently)
