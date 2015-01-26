@@ -9,12 +9,15 @@ object SessionManagement {
    */
   private val max_inactivity_time = 300000
   private val secure_prefix = "3240dmiv00%$xsmo!a8730"
+  private val md = java.security.MessageDigest.getInstance("SHA-1")
 
   var loggedInUsers = Seq[Session]()
 
+  private def tokenFormat(user: User): String = secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)
+  private def token(user: User): String = md.digest(tokenFormat(user).getBytes).toString
+
   def logUserIn(user: User): HttpCookie = {
-    val md = java.security.MessageDigest.getInstance("SHA-1");
-    val token = md.digest((secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)).getBytes).toString
+    val token = this.token(user)
     loggedInUsers = loggedInUsers :+ new Session(token, user)
     println("new user logged in " + user.name + " with token " + token)
     HttpCookie("logged", content = token)

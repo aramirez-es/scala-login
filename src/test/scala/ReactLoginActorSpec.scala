@@ -32,7 +32,7 @@ class LoginServiceSpec extends Specification with Specs2RouteTest with LoginServ
 
     "return ValidationRejection when POST to /login with invalid credentials" in {
       Post("/login", FormData(Seq("user_name" -> "aramirez_", "user_password" -> "123456"))) ~> loginRoute ~> check {
-        rejection === ValidationRejection("Email or password not valid")
+        rejection === ValidationRejection("Email or password not valid.")
       }
     }
 
