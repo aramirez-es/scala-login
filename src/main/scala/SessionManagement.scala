@@ -14,7 +14,11 @@ object SessionManagement {
   var loggedInUsers = Seq[Session]()
 
   private def tokenFormat(user: User): String = secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)
+
   private def token(user: User): String = md.digest(tokenFormat(user).getBytes).toString
+
+  private def isSessionEnabled(token: String, current_time: Long): (Session => Boolean) =
+    (session => session.token == token && session.time_of_last_activity + max_inactivity_time > current_time)
 
   def logUserIn(user: User): HttpCookie = {
     val token = this.token(user)
@@ -25,12 +29,13 @@ object SessionManagement {
 
   def logUserOut(token: String): Unit = {
     println("log out user with token " + token)
+    // TODO: use an Actor to remove periodically sessions intead of remove them here.
     loggedInUsers = loggedInUsers.filterNot(session => session.token == token)
   }
 
   def findUserLogged(token: String): Option[Session] = {
     val current_time = System.currentTimeMillis
-    loggedInUsers.find((session => session.token == token && session.time_of_last_activity + max_inactivity_time > current_time)) match {
+    loggedInUsers find isSessionEnabled(token, current_time) match {
       case Some(session) => {
         session.time_of_last_activity = current_time
         Some(session)

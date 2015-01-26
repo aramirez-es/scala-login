@@ -15,6 +15,10 @@ class ReactLoginActor extends Actor with LoginService {
 
 trait LoginService extends HttpService with UserRepository {
 
+  // Redirect to "/" does not work. Hardcoded until find out a solution.
+  lazy val redirectToHome = redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+  lazy val redirectToLogin = redirect("/login", StatusCodes.MovedPermanently)
+
   val loginRoute =
     get {
       respondWithMediaType(`text/html`) {
@@ -34,7 +38,7 @@ trait LoginService extends HttpService with UserRepository {
         path("login") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              case Some(session) => redirectToHome
               case None => complete {
                 html.login.render().toString()
               }
@@ -49,12 +53,9 @@ trait LoginService extends HttpService with UserRepository {
             SessionManagement.findUserLogged(loggin_cookie.content) match {
               case Some(session) => deleteCookie("logged") {
                 SessionManagement.logUserOut(session.user.name)
-                // Redirect to "" does not work. Hardcoded until find a fix to that.
-                redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+                redirectToHome
               }
-              case None =>
-                // Redirect to "" does not work. Hardcoded until find a fix to that.
-                redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              case None => redirectToHome
             }
           }
         } ~
@@ -64,9 +65,9 @@ trait LoginService extends HttpService with UserRepository {
               case Some(session) => complete {
                 html.page.render(session.user.name, 1).toString()
               }
-              case None => redirect("/login", StatusCodes.MovedPermanently)
+              case None => redirectToLogin
             }
-            case None => redirect("/login", StatusCodes.MovedPermanently)
+            case None => redirectToLogin
           }
         } ~
         path("page2") {
@@ -75,9 +76,9 @@ trait LoginService extends HttpService with UserRepository {
               case Some(session) => complete {
                 html.page.render(session.user.name, 2).toString()
               }
-              case None => redirect("/login", StatusCodes.MovedPermanently)
+              case None => redirectToLogin
             }
-            case None => redirect("/login", StatusCodes.MovedPermanently)
+            case None => redirectToLogin
           }
         } ~
         path("page3") {
@@ -86,9 +87,9 @@ trait LoginService extends HttpService with UserRepository {
               case Some(session) => complete {
                 html.page.render(session.user.name, 3).toString()
               }
-              case None => redirect("/login", StatusCodes.MovedPermanently)
+              case None => redirectToLogin
             }
-            case None => redirect("/login", StatusCodes.MovedPermanently)
+            case None => redirectToLogin
           }
         }
       }
@@ -99,8 +100,7 @@ trait LoginService extends HttpService with UserRepository {
         formFields('user_name, 'user_password) { (user_name, user_password) =>
           checkLogin(user_name, user_password) match {
             case Some(user) => setCookie(SessionManagement.logUserIn(user)) {
-              // Redirect to "" does not work. Hardcoded until find a fix to that.
-              redirect("http://localhost:8080", StatusCodes.MovedPermanently)
+              redirectToHome
             }
             case None => reject(ValidationRejection("Email or password not valid."))
           }
