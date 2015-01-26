@@ -8,11 +8,11 @@ object SessionManagement {
 
   var loggedInUsers = Seq[Session]()
 
-  def logUserIn(user_name: String, user_password: String): HttpCookie = {
+  def logUserIn(user: User): HttpCookie = {
     val md = java.security.MessageDigest.getInstance("SHA-1");
-    val token = md.digest((secure_prefix.concat(user_name).concat(System.currentTimeMillis.toString)).getBytes).toString
-    loggedInUsers = loggedInUsers :+ new Session(token, user_name)
-    println("new user logged in " + user_name + " with token " + token)
+    val token = md.digest((secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)).getBytes).toString
+    loggedInUsers = loggedInUsers :+ new Session(token, user)
+    println("new user logged in " + user.name + " with token " + token)
     HttpCookie("logged", content = token)
   }
 
