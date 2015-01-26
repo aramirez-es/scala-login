@@ -13,6 +13,9 @@ class ReactLoginActor extends Actor with LoginService {
 
 }
 
+/**
+ * All pattern matching should be replaced by instances of Future, instead of encourage Reactive Programming.
+ */
 trait LoginService extends HttpService with UserRepository {
 
   // Redirect to "/" does not work. Hardcoded until find out a solution.
@@ -62,8 +65,10 @@ trait LoginService extends HttpService with UserRepository {
         path("page1") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(user) => complete {
-                html.page.render(user.name, 1).toString()
+              case Some(user) => authorize(hasPrivilege(user, "PAG_1")) {
+                complete {
+                  html.page.render(user.name, 1).toString()
+                }
               }
               case None => redirectToLogin
             }
@@ -73,8 +78,10 @@ trait LoginService extends HttpService with UserRepository {
         path("page2") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(user) => complete {
-                html.page.render(user.name, 2).toString()
+              case Some(user) => authorize(hasPrivilege(user, "PAG_2")) {
+                complete {
+                  html.page.render(user.name, 2).toString()
+                }
               }
               case None => redirectToLogin
             }
@@ -84,8 +91,10 @@ trait LoginService extends HttpService with UserRepository {
         path("page3") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(user) => complete {
-                html.page.render(user.name, 3).toString()
+              case Some(user) => authorize(hasPrivilege(user, "PAG_3")) {
+                complete {
+                  html.page.render(user.name, 3).toString()
+                }
               }
               case None => redirectToLogin
             }

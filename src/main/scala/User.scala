@@ -3,5 +3,4 @@ package com.aramirez
 /**
  * A class to represent users.
  */
-case class User(val name: String, val password: String, val rol: String = "") {
-}
+case class User(name: String, password: String, role: List[String])

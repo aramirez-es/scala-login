@@ -2,6 +2,9 @@ package com.aramirez
 
 import spray.http.HttpCookie
 
+/**
+ * This should be handled with an Akka Agent instead.
+ */
 object SessionManagement {
 
   /**
@@ -30,7 +33,6 @@ object SessionManagement {
 
   def logUserOut(token: String): Unit = {
     println("log out user with token " + token)
-    // TODO: use an Actor to remove periodically sessions intead of remove them here.
     loggedInUsers -= token
   }
 
