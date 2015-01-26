@@ -26,7 +26,7 @@ trait LoginService extends HttpService with UserRepository {
           optionalCookie("logged") {
             case Some(loggin_cookie) => complete {
               SessionManagement.findUserLogged(loggin_cookie.content) match {
-                case Some(session) => html.index.render(session.user.name).toString()
+                case Some(user) => html.index.render(user.name).toString()
                 case None => html.index.render("").toString()
               }
             }
@@ -38,7 +38,7 @@ trait LoginService extends HttpService with UserRepository {
         path("login") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => redirectToHome
+              case Some(user) => redirectToHome
               case None => complete {
                 html.login.render().toString()
               }
@@ -51,8 +51,8 @@ trait LoginService extends HttpService with UserRepository {
         path("logout") {
           cookie("logged") { loggin_cookie =>
             SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => deleteCookie("logged") {
-                SessionManagement.logUserOut(session.user.name)
+              case Some(user) => deleteCookie("logged") {
+                SessionManagement.logUserOut(user.name)
                 redirectToHome
               }
               case None => redirectToHome
@@ -62,8 +62,8 @@ trait LoginService extends HttpService with UserRepository {
         path("page1") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => complete {
-                html.page.render(session.user.name, 1).toString()
+              case Some(user) => complete {
+                html.page.render(user.name, 1).toString()
               }
               case None => redirectToLogin
             }
@@ -73,8 +73,8 @@ trait LoginService extends HttpService with UserRepository {
         path("page2") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => complete {
-                html.page.render(session.user.name, 2).toString()
+              case Some(user) => complete {
+                html.page.render(user.name, 2).toString()
               }
               case None => redirectToLogin
             }
@@ -84,8 +84,8 @@ trait LoginService extends HttpService with UserRepository {
         path("page3") {
           optionalCookie("logged") {
             case Some(loggin_cookie) => SessionManagement.findUserLogged(loggin_cookie.content) match {
-              case Some(session) => complete {
-                html.page.render(session.user.name, 3).toString()
+              case Some(user) => complete {
+                html.page.render(user.name, 3).toString()
               }
               case None => redirectToLogin
             }

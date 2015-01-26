@@ -10,19 +10,20 @@ object SessionManagement {
   private val max_inactivity_time = 300000
   private val secure_prefix = "3240dmiv00%$xsmo!a8730"
   private val md = java.security.MessageDigest.getInstance("SHA-1")
+  private val loggedInUsers = scala.collection.concurrent.TrieMap.empty[String,Session]
 
-  var loggedInUsers = Seq[Session]()
+  private def tokenFormat(user: User): String =
+    secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)
 
-  private def tokenFormat(user: User): String = secure_prefix.concat(user.name).concat(System.currentTimeMillis.toString)
+  private def token(user: User): String =
+    md.digest(tokenFormat(user).getBytes).toString
 
-  private def token(user: User): String = md.digest(tokenFormat(user).getBytes).toString
-
-  private def isSessionEnabled(token: String, current_time: Long): (Session => Boolean) =
-    (session => session.token == token && session.time_of_last_activity + max_inactivity_time > current_time)
+  private def isSessionEnabled(user_token: String, current_time: Long): (((String,Session)) => Boolean) =
+    (row) => row._1 == user_token && row._2.time_of_last_activity + max_inactivity_time > current_time
 
   def logUserIn(user: User): HttpCookie = {
     val token = this.token(user)
-    loggedInUsers = loggedInUsers :+ new Session(token, user)
+    loggedInUsers += (token -> new Session(token, user, System.currentTimeMillis))
     println("new user logged in " + user.name + " with token " + token)
     HttpCookie("logged", content = token)
   }
@@ -30,15 +31,14 @@ object SessionManagement {
   def logUserOut(token: String): Unit = {
     println("log out user with token " + token)
     // TODO: use an Actor to remove periodically sessions intead of remove them here.
-    loggedInUsers = loggedInUsers.filterNot(session => session.token == token)
+    loggedInUsers -= token
   }
 
-  def findUserLogged(token: String): Option[Session] = {
-    val current_time = System.currentTimeMillis
-    loggedInUsers find isSessionEnabled(token, current_time) match {
-      case Some(session) => {
-        session.time_of_last_activity = current_time
-        Some(session)
+  def findUserLogged(token: String): Option[User] = {
+    loggedInUsers find isSessionEnabled(token, System.currentTimeMillis) match {
+      case Some((token,session)) => {
+        loggedInUsers replace (token, new Session(token, session.user, System.currentTimeMillis))
+        Some(session.user)
       }
       case None => None
     }
