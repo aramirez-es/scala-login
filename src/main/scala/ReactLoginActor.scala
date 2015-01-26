@@ -16,13 +16,13 @@ class ReactLoginActor extends Actor with LoginService {
 trait LoginService extends HttpService {
 
   val userRepository = Seq(
-    ("user_1", "123456"),
-    ("user_2", "123456"),
-    ("user_3", "123456")
+    new User("user_1", "123456"),
+    new User("user_2", "123456"),
+    new User("user_3", "123456")
   )
 
   def checkLogin(user_name: String, user_pass: String): Boolean = {
-    userRepository.exists(tuple => tuple._1 == user_name && tuple._2 == user_pass)
+    userRepository.exists(user => user.name == user_name && user.password == user_pass)
   }
 
   val loginRoute =
