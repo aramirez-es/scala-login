@@ -7,7 +7,7 @@ object SessionManagement {
   /**
    * Time that a user could remain inactive (in milli-seconds), beyond this value, user is logged out.
    */
-  private val max_inactivity_time = 10000
+  private val max_inactivity_time = 300000
   private val secure_prefix = "3240dmiv00%$xsmo!a8730"
 
   var loggedInUsers = Seq[Session]()
