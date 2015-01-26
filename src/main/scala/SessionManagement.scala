@@ -4,7 +4,11 @@ import spray.http.HttpCookie
 
 object SessionManagement {
 
-  val secure_prefix = "3240dmiv00%$xsmo!a8730"
+  /**
+   * Time that a user could remain inactive (in milli-seconds), beyond this value, user is logged out.
+   */
+  private val max_inactivity_time = 10000
+  private val secure_prefix = "3240dmiv00%$xsmo!a8730"
 
   var loggedInUsers = Seq[Session]()
 
@@ -22,6 +26,13 @@ object SessionManagement {
   }
 
   def findUserLogged(token: String): Option[Session] = {
-    loggedInUsers.find((session => session.token == token))
+    val current_time = System.currentTimeMillis
+    loggedInUsers.find((session => session.token == token && session.time_of_last_activity + max_inactivity_time > current_time)) match {
+      case Some(session) => {
+        session.time_of_last_activity = current_time
+        Some(session)
+      }
+      case None => None
+    }
   }
 }
