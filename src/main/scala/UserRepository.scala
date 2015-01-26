@@ -8,7 +8,8 @@ trait UserRepository {
     // User with more than one role
     new User("user_13", "123456", List("PAG_1", "PAG_3")),
     new User("user_23", "123456", List("PAG_2", "PAG_3")),
-    new User("user_12", "123456", List("PAG_1", "PAG_2"))
+    new User("user_12", "123456", List("PAG_1", "PAG_2")),
+    new User("user_123", "123456", List("PAG_1", "PAG_2", "PAG_3"))
   )
 
   def checkLogin(user_name: String, user_pass: String): Option[User] =

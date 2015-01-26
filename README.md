@@ -30,6 +30,18 @@ Starting application on 8080
 
 Go to your browser and open **http://127.0.0.1:8080**
 
+## Test Cases
+These are users and their privileges:
+- user_1 => can access to page1
+- user_2 => can access to page2
+- user_3 => can access to page3
+- user_13 => can access to both page1 and page3
+- user_12 => can access to both page1 and page2
+- user_23 => can access to both page2 and page3
+- user_123 => can access to all pages: page1, page2 and page3.
+
+Password is the same for all users **123456**.
+
 ## Tests
 The number of tests is really low, but you can launch them as follow
 
